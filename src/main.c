@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
 void show_usage(const char* name) {
     fprintf(stderr,
-            "SampConsoleLauncher v.1.0.0 "
+            "SampConsoleLauncher v.1.1.0 "
             "<https://github.com/RinatNamazov/SampConsoleLauncher>\n"
             "Developer: Rinat Namazov\n"
             "Copyright (c) 2023 RINWARES <rinwares.com>\n\n"
