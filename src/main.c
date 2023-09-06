@@ -38,12 +38,12 @@ void show_usage(const char* name) {
             "Developer: Rinat Namazov\n"
             "Copyright (c) 2023 RINWARES <rinwares.com>\n"
             "Usage: %s"
-            "\n--host 127.0.0.1 (required)"
-            "\n--port 7777 (required)"
-            "\n--nickname Rinat_Namazov (optional)"
-            "\n--password strong1pass (optional)"
-            "\n--game_path \"D:\\Games\\GTA_SA\\gta_sa.exe\" (optional)"
-            "\n\nIf the game_path and/or nickname is not specified, "
+            "\n--host (-h) 127.0.0.1 (required)"
+            "\n--port (-p) 7777 (required)"
+            "\n--nickname (-n) Rinat_Namazov (optional)"
+            "\n--password (-z) strong1pass (optional)"
+            "\n--game-path (-g) \"D:\\Games\\GTA_SA\\gta_sa.exe\" (optional)"
+            "\n\nIf the game-path and/or nickname is not specified, "
             "the program will try to find them in the registry.",
             name);
 }
@@ -58,14 +58,15 @@ bool parse_cmd_args(int argc, char* argv[], struct command_line_args* args) {
     bool  port_setted = false;
     char* arg;
     for (int i = 1; i < argc; ++i) {
-        if (!strcmp(argv[i], "--host")) {
+        arg = argv[i];
+        if (!strcmp(arg, "--host") || !strcmp(arg, "-h")) {
             arg = argv[++i];
             if (strlen(arg) > MAX_HOST_LENGTH) {
                 fprintf(stderr, "Invalid host address, length longer than %d\n", MAX_HOST_LENGTH);
                 return false;
             }
             strcpy(args->host, arg);
-        } else if (!strcmp(argv[i], "--port")) {
+        } else if (!strcmp(arg, "--port") || !strcmp(arg, "-p")) {
             arg = argv[++i];
             char* end;
             long  port = strtol(arg, &end, 0);
@@ -75,21 +76,21 @@ bool parse_cmd_args(int argc, char* argv[], struct command_line_args* args) {
             }
             args->port  = (uint16_t)port;
             port_setted = true;
-        } else if (!strcmp(argv[i], "--nickname")) {
+        } else if (!strcmp(arg, "--nickname") || !strcmp(arg, "-n")) {
             arg = argv[++i];
             if (strlen(arg) > MAX_NICKNAME_LENGTH) {
                 fprintf(stderr, "Invalid nickname, length longer than %d\n", MAX_NICKNAME_LENGTH);
                 return false;
             }
             strcpy(args->nickname, arg);
-        } else if (!strcmp(argv[i], "--password")) {
+        } else if (!strcmp(arg, "--password") || !strcmp(arg, "-z")) {
             arg = argv[++i];
             if (strlen(arg) > MAX_PASSWORD_LENGTH) {
                 fprintf(stderr, "Invalid password, length longer than %d\n", MAX_PASSWORD_LENGTH);
                 return false;
             }
             strcpy(args->password, arg);
-        } else if (!strcmp(argv[i], "--game_path")) {
+        } else if (!strcmp(arg, "--game-path") || !strcmp(arg, "-g")) {
             arg = argv[++i];
             if (strlen(arg) > MAX_PATH) {
                 fprintf(stderr, "Invalid gta_sa.exe path, length longer than %d\n", MAX_PATH);
