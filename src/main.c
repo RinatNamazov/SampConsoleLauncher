@@ -36,19 +36,64 @@ void show_usage(const char* name) {
             "SampConsoleLauncher v.1.0.0 "
             "<https://github.com/RinatNamazov/SampConsoleLauncher>\n"
             "Developer: Rinat Namazov\n"
-            "Copyright (c) 2023 RINWARES <rinwares.com>\n"
+            "Copyright (c) 2023 RINWARES <rinwares.com>\n\n"
             "Usage: %s"
-            "\n--host (-h) 127.0.0.1 (required)"
-            "\n--port (-p) 7777 (required)"
-            "\n--nickname (-n) Rinat_Namazov (optional)"
-            "\n--password (-z) strong1pass (optional)"
-            "\n--game-path (-g) \"D:\\Games\\GTA_SA\\gta_sa.exe\" (optional)"
+            "\n\t--host (-h) 127.0.0.1 (required)"
+            "\n\t--port (-p) 7777 (required)"
+            "\n\t--nickname (-n) Rinat_Namazov (optional)"
+            "\n\t--password (-z) strong1pass (optional)"
+            "\n\t--game-path (-g) \"D:\\Games\\GTA_SA\\gta_sa.exe\" (optional)"
             "\n\nIf the game-path and/or nickname is not specified, "
-            "the program will try to find them in the registry.",
+            "the program will attempt to find them in the registry.\n"
+            "Alternatively, you can simply enter the server address in the format host:port and "
+            "optionally a nickname after it.",
             name);
 }
 
+bool parse_very_short_cmd_args(int argc, char* argv[], struct command_line_args* args) {
+    char* address = argv[1];
+    char* colon   = strchr(address, ':');
+    if (colon == NULL) {
+        fprintf(stderr, "Invalid address format, should be host:port\n");
+        return false;
+    }
+
+    *colon         = '\0';
+    char* host     = address;
+    char* port_str = colon + 1;
+
+    if (strlen(host) > MAX_HOST_LENGTH) {
+        fprintf(stderr, "Invalid host address, length longer than %d\n", MAX_HOST_LENGTH);
+        return false;
+    }
+
+    char* end;
+    long  port = strtol(port_str, &end, 0);
+    if (end == port_str || end[0] != '\0' || errno == ERANGE || port < 0 || port > UINT16_MAX) {
+        fprintf(stderr, "Invalid port, must be in the range 0-%d\n", UINT16_MAX);
+        return false;
+    }
+
+    strcpy(args->host, host);
+    args->port = (uint16_t)port;
+
+    if (argc == 3) {
+        char* nickname = argv[2];
+        if (strlen(nickname) > MAX_NICKNAME_LENGTH) {
+            fprintf(stderr, "Invalid nickname, length longer than %d\n", MAX_NICKNAME_LENGTH);
+            return false;
+        }
+        strcpy(args->nickname, nickname);
+    }
+
+    return true;
+}
+
 bool parse_cmd_args(int argc, char* argv[], struct command_line_args* args) {
+    if (argc == 2 || argc == 3) {
+        return parse_very_short_cmd_args(argc, argv, args);
+    }
+
     // Not enough arguments or an odd number of arguments.
     if (argc < 5 || ((argc - 1) % 2) != 0) {
         show_usage(argv[0]);
